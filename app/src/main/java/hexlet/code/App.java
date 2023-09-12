@@ -12,8 +12,7 @@ import io.javalin.Javalin;
 import gg.jte.ContentType;
 import io.javalin.rendering.template.JavalinJte;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
 import java.sql.SQLException;
 import java.util.stream.Collectors;
@@ -47,6 +46,21 @@ public class App {
         return templateEngine;
     }
 
+    public static String getResourceFileAsString(String fileName) {
+        InputStream is = getResourceFileAsInputStream(fileName);
+        if (is != null) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            return (String)reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        } else {
+            throw new RuntimeException("resource not found");
+        }
+    }
+
+    public static InputStream getResourceFileAsInputStream(String fileName) {
+        ClassLoader classLoader = App.class.getClassLoader();
+        return classLoader.getResourceAsStream(fileName);
+    }
+
     public static Javalin getApp() throws IOException, SQLException {
 
         JavalinJte.init(createTemplateEngine());
@@ -57,10 +71,12 @@ public class App {
 
         var dataSource = new HikariDataSource(hikariConfig);
         // Способ получить путь до файла в src/main/resources
-        var url = App.class.getClassLoader().getResource("schema.sql");
-        var file = new File(url.getFile());
-        var sql = Files.lines(file.toPath())
-                .collect(Collectors.joining("\n"));
+//        var url = App.class.getClassLoader().getResource("schema.sql");
+//        var file = new File(url.getFile());
+//        var sql = Files.lines(file.toPath())
+//                .collect(Collectors.joining("\n"));
+        var sql = getResourceFileAsString("schema.sql");
+
 
         // Получаем соединение, создаем стейтмент и выполняем запрос
         try (var connection = dataSource.getConnection();

@@ -26,13 +26,13 @@ public class App {
         return Integer.valueOf(port);
     }
 
-    private static String getMode() {
-        return System.getenv().getOrDefault("APP_ENV", "development");
-    }
-
-    static boolean isProduction() {
-        return getMode().equals("production");
-    }
+//    private static String getMode() {
+//        return System.getenv().getOrDefault("APP_ENV", "development");
+//    }
+//
+//    static boolean isProduction() {
+//        return getMode().equals("production");
+//    }
 
     static String getDatabaseUrl() {
         return System.getenv().getOrDefault(
@@ -57,7 +57,7 @@ public class App {
 
         var dataSource = new HikariDataSource(hikariConfig);
         // Способ получить путь до файла в src/main/resources
-        var url = App.class.getClassLoader().getResource("schema.sql");
+        var url = App.class.getClassLoader().getResource("classpath:schema.sql");
         var file = new File(url.getFile());
         var sql = Files.lines(file.toPath())
                 .collect(Collectors.joining("\n"));

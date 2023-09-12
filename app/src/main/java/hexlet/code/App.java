@@ -57,7 +57,7 @@ public class App {
 
         var dataSource = new HikariDataSource(hikariConfig);
         // Способ получить путь до файла в src/main/resources
-        var url = App.class.getClassLoader().getResource("classpath:schema.sql");
+        var url = App.class.getClassLoader().getResource("schema.sql");
         var file = new File(url.getFile());
         var sql = Files.lines(file.toPath())
                 .collect(Collectors.joining("\n"));

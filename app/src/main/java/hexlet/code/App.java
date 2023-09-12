@@ -12,8 +12,11 @@ import io.javalin.Javalin;
 import gg.jte.ContentType;
 import io.javalin.rendering.template.JavalinJte;
 
-import java.io.*;
-import java.nio.file.Files;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.stream.Collectors;
 
@@ -24,14 +27,6 @@ public class App {
         String port = System.getenv().getOrDefault("PORT", "7070");
         return Integer.valueOf(port);
     }
-
-//    private static String getMode() {
-//        return System.getenv().getOrDefault("APP_ENV", "development");
-//    }
-//
-//    static boolean isProduction() {
-//        return getMode().equals("production");
-//    }
 
     static String getDatabaseUrl() {
         return System.getenv().getOrDefault(
@@ -50,7 +45,7 @@ public class App {
         InputStream is = getResourceFileAsInputStream(fileName);
         if (is != null) {
             BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-            return (String)reader.lines().collect(Collectors.joining(System.lineSeparator()));
+            return (String) reader.lines().collect(Collectors.joining(System.lineSeparator()));
         } else {
             throw new RuntimeException("resource not found");
         }

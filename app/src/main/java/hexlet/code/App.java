@@ -65,15 +65,8 @@ public class App {
 
 
         var dataSource = new HikariDataSource(hikariConfig);
-        // Способ получить путь до файла в src/main/resources
-//        var url = App.class.getClassLoader().getResource("schema.sql");
-//        var file = new File(url.getFile());
-//        var sql = Files.lines(file.toPath())
-//                .collect(Collectors.joining("\n"));
         var sql = getResourceFileAsString("schema.sql");
 
-
-        // Получаем соединение, создаем стейтмент и выполняем запрос
         try (var connection = dataSource.getConnection();
              var statement = connection.createStatement()) {
             statement.execute(sql);
@@ -89,10 +82,10 @@ public class App {
             ctx.contentType("text/html; charset=utf-8");
         });
 
-        app.get(NamedRoutes.rootPath(), RootController::index);
+        app.get(NamedRoutes.ROOT_PATH, RootController::index);
 
-        app.get(NamedRoutes.urlsPath(), UrlController::index);
-        app.post(NamedRoutes.urlsPath(), UrlController::create);
+        app.get(NamedRoutes.URLS_PATH, UrlController::index);
+        app.post(NamedRoutes.URLS_PATH, UrlController::create);
 
         app.get(NamedRoutes.showUrlPath("{id}"), UrlController::show);
         app.post(NamedRoutes.checkUrlPath("{id}"), UrlController::checkUrl);

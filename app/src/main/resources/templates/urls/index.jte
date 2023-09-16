@@ -32,8 +32,8 @@ content = @`
                     <td class="col-2"></td>
                         <td class="col-2"></td>
                         @else
-                        <td class="col-2">${url.getUrlCheckList().get(url.getUrlCheckList().size()-1).getCreatedAt().toString()}</td>
-                        <td class="col-2">${url.getUrlCheckList().get(url.getUrlCheckList().size()-1).getStatusCode()}</td>
+                        <td class="col-2">${url.getUrlCheckList().stream().reduce((a, a1) -> a1).get().getCreatedAt().toString()}</td>
+                        <td class="col-2">${url.getUrlCheckList().stream().reduce((a, a1) -> a1).get().getStatusCode()}</td>
                     @endif
                         </tr>
                 </tbody>

@@ -17,9 +17,9 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.Date;
-import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.List;
 
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
@@ -41,7 +41,8 @@ public class UrlController {
 
         for (Url url: pagedUrls) {
             if (!UrlCheckRepository.getEntities(url.getId()).isEmpty()) {
-                url.setUrlCheckList();
+                List<UrlCheck> checks = UrlCheckRepository.getEntities(url.getId());
+                url.setUrlCheckList(checks);
             }
         }
 
@@ -52,33 +53,30 @@ public class UrlController {
 
     public static void create(Context ctx) throws SQLException {
         var name = ctx.formParam("url");
-
+        String normalizedUrl = "";
         try {
             URL initialUrl = new URL(name);
-            String normalizedUrl = initialUrl.getProtocol() + "://" + initialUrl.getAuthority();
+            // The Authority part of the URL is the host name and the port of the URL.
+            normalizedUrl = initialUrl.getProtocol() + "://" + initialUrl.getAuthority();
+        } catch (MalformedURLException e) {
+            ctx.sessionAttribute("flash", "Некорректный URL");
+            ctx.redirect(NamedRoutes.ROOT_PATH);
+            return;
+        }
 
-            Date currentDate = new Date();
-            Timestamp createdAt = new Timestamp(currentDate.getTime());
+        Date currentDate = new Date();
+        Timestamp createdAt = new Timestamp(currentDate.getTime());
 
-
-            var checkedUrl = UrlRepository.find(normalizedUrl);
-            if (checkedUrl.isPresent()) {
-                ctx.sessionAttribute("flash", "Страница уже существует");
-                ctx.redirect(NamedRoutes.urlsPath());
-                return;
-            }
-
+        var checkedUrl = UrlRepository.find(normalizedUrl);
+        if (checkedUrl.isPresent()) {
+            ctx.sessionAttribute("flash", "Страница уже существует");
+            ctx.redirect(NamedRoutes.URLS_PATH);
+        } else {
             var url = new Url(normalizedUrl, createdAt);
 
             UrlRepository.save(url);
-
             ctx.sessionAttribute("flash", "Страница успешно добавлена");
-            ctx.redirect(NamedRoutes.urlsPath());
-
-        } catch (MalformedURLException e) {
-            ctx.sessionAttribute("flash", "Некорректный URL");
-            ctx.render("index.jte");
-            ctx.redirect(NamedRoutes.rootPath());
+            ctx.redirect(NamedRoutes.URLS_PATH);
         }
     }
 
@@ -131,7 +129,6 @@ public class UrlController {
         Timestamp createdAt = new Timestamp(currentDate.getTime());
 
         UrlCheck urlCheck = new UrlCheck(status, h1, title, description, id, createdAt);
-
         UrlCheckRepository.save(urlCheck);
 
         ctx.sessionAttribute("flash", "Страница успешно проверена");

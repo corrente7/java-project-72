@@ -15,8 +15,9 @@ import kong.unirest.Unirest;
 import io.javalin.Javalin;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Nested;
 
 import java.io.File;
 import java.io.IOException;
@@ -35,25 +36,31 @@ public final class AppTest {
     private static MockWebServer server;
 
     @BeforeAll
-    public static void setUp() throws IOException, SQLException {
+    public static void initApp() throws SQLException, IOException {
         app = App.getApp();
         app.start(0);
         int port = app.port();
         baseUrl = "http://localhost:" + port;
+    }
+
+    @BeforeEach
+    public void initBase() throws SQLException {
         var url = new Url("https://abr.com", Timestamp.valueOf("2022-09-08 21:16:28.105"));
         UrlRepository.save(url);
         var urlCheck = new UrlCheck(200, "h1", "title", "description", 1, Timestamp.valueOf("2023-01-01 21:16:28.105"));
         UrlCheckRepository.save(urlCheck);
+    }
+
+    @BeforeEach
+    public void initMockServer() throws IOException {
+        server = new MockWebServer();
         String path = "src/test/resources/test.html";
         File file = new File(path);
         String absolutePath = file.getAbsolutePath();
-
         String page = Files.readString(Paths.get(absolutePath));
 
-        server = new MockWebServer();
         MockResponse mockedResponse = new MockResponse()
                 .setBody(page);
-
         server.enqueue(mockedResponse);
         server.start();
     }
@@ -64,7 +71,6 @@ public final class AppTest {
         app.stop();
     }
 
-    @Nested
     class RootTest {
 
         @Test
@@ -181,8 +187,6 @@ public final class AppTest {
 
 
             var url1 = UrlRepository.find(testUrl.substring(0, testUrl.length() - 1));
-            // почему-то присваивается id=0, не поняла почему и ничего умнее не придумала, как засеттить
-            url1.get().setId(2);
 
             assertThat(url1.isPresent());
 
@@ -204,7 +208,6 @@ public final class AppTest {
             assertThat(body1).contains("title text");
             assertThat(body1).contains("description text");
             assertThat(body1).contains("h1 text");
-
         }
     }
 }

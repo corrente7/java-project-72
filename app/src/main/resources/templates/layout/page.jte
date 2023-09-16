@@ -23,8 +23,8 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <div class="navbar-nav">
-                <a class="nav-link" href="${NamedRoutes.rootPath()}">Главная</a>
-                <a class="nav-link" href="${NamedRoutes.urlsPath()}">Сайты</a>
+                <a class="nav-link" href="${NamedRoutes.ROOT_PATH}">Главная</a>
+                <a class="nav-link" href="${NamedRoutes.URLS_PATH}">Сайты</a>
             </div>
         </div>
     </div>

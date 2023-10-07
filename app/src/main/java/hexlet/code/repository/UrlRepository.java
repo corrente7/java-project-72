@@ -101,4 +101,24 @@ public class UrlRepository extends BaseRepository {
             return Optional.empty();
         }
     }
+
+    public static List<Url> getPagedUrls(int limit, int skipCount) throws SQLException {
+        var sql = "SELECT * FROM urls LIMIT ? OFFSET ?";
+        try (var conn = dataSource.getConnection();
+             var stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, limit);
+            stmt.setInt(2, skipCount);
+            var resultSet = stmt.executeQuery();
+            var result = new ArrayList<Url>();
+            while (resultSet.next()) {
+                var id = resultSet.getLong("id");
+                var name = resultSet.getString("name");
+                var createdAt = resultSet.getTimestamp("created_at");
+                var url = new Url(name, createdAt);
+                url.setId(id);
+                result.add(url);
+            }
+            return result;
+        }
+    }
 }

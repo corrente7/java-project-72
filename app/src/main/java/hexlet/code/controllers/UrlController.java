@@ -34,10 +34,12 @@ public class UrlController {
         var per = 10;
         int skipCount = (pageNumber - 1) * per;
 
-        List<Url> pagedUrls = urls.stream()
-                .skip(skipCount)
-                .limit(per)
-                .collect(Collectors.toList());
+//        List<Url> pagedUrls = urls.stream()
+//                .skip(skipCount)
+//                .limit(per)
+//                .collect(Collectors.toList());
+
+        List<Url> pagedUrls = UrlRepository.getPagedUrls(per, skipCount);
 
         for (Url url: pagedUrls) {
             if (!UrlCheckRepository.getEntities(url.getId()).isEmpty()) {
@@ -82,13 +84,14 @@ public class UrlController {
 
     public static void show(Context ctx) throws SQLException {
         var id = ctx.pathParamAsClass("id", Long.class).get();
-        var url = UrlRepository.find(id);
+        var displayedUrl = UrlRepository.find(id)
+                .orElseThrow(() -> new NotFoundResponse("Page not found"));
 
-        if (url.isEmpty()) {
-            throw new NotFoundResponse("Page not found");
-        }
+//        if (url.isEmpty()) {
+//            throw new NotFoundResponse("Page not found");
+//        }
 
-        Url displayedUrl = url.get();
+//        Url displayedUrl = url.get();
         var page = new UrlPage(displayedUrl);
 
         List<UrlCheck> checks = UrlCheckRepository.getEntities(id);

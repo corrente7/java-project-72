@@ -22,4 +22,9 @@ public final class Url {
         this.name = name;
         this.createdAt = createdAt;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }

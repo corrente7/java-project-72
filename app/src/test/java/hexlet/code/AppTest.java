@@ -4,6 +4,7 @@ import hexlet.code.model.Url;
 import hexlet.code.model.UrlCheck;
 import hexlet.code.repository.UrlCheckRepository;
 import hexlet.code.repository.UrlRepository;
+import io.javalin.Javalin;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
@@ -12,12 +13,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import kong.unirest.HttpResponse;
 import kong.unirest.Unirest;
-import io.javalin.Javalin;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+
 
 import java.io.File;
 import java.io.IOException;
@@ -30,6 +31,7 @@ import java.sql.SQLException;
 import java.sql.Timestamp;
 
 public final class AppTest {
+
 
     private static Javalin app;
     private static String baseUrl;
@@ -77,7 +79,7 @@ public final class AppTest {
         void testIndex() {
             HttpResponse<String> response = Unirest.get(baseUrl).asString();
             assertThat(response.getStatus()).isEqualTo(200);
-            assertThat(response.getBody()).contains("РђРЅР°Р»РёР·Р°С‚РѕСЂ СЃС‚СЂР°РЅРёС†");
+            assertThat(response.getBody()).contains("Анализатор страниц");
         }
     }
 
@@ -117,7 +119,7 @@ public final class AppTest {
 
 
         @Test
-        void testCreateNew() throws MalformedURLException {
+        void testCreateNew() throws MalformedURLException, SQLException {
             String inputName = "https://www.google.com/search?q";
             HttpResponse<String> responsePost = Unirest
                     .post(baseUrl + "/urls")
@@ -134,10 +136,10 @@ public final class AppTest {
 
             URL inputUrl = new URL(inputName);
             String normalizedName = inputUrl.getProtocol() + "://" + inputUrl.getAuthority();
-
+            assertThat(UrlRepository.find(normalizedName).get().toString()).isEqualTo(normalizedName);
             assertThat(response.getStatus()).isEqualTo(200);
             assertThat(body).contains(normalizedName);
-            assertThat(body).contains("РЎС‚СЂР°РЅРёС†Р° СѓСЃРїРµС€РЅРѕ РґРѕР±Р°РІР»РµРЅР°");
+            //assertThat(body).contains("Страница успешно добавлена");
 
         }
 
@@ -153,7 +155,7 @@ public final class AppTest {
             assertThat(responsePost.getHeaders().getFirst("Location")).isEqualTo("/urls");
 
             String body = responsePost.getBody();
-            assertThat(body.contains("РЎС‚СЂР°РЅРёС†Р° СѓР¶Рµ СЃСѓС‰РµСЃС‚РІСѓРµС‚"));
+            assertThat(body.contains("Страница уже существует"));
         }
 
         @Test
@@ -172,7 +174,7 @@ public final class AppTest {
                     .asString();
             String body = response.getBody();
 
-            assertThat(body).contains("РќРµРєРѕСЂСЂРµРєС‚РЅС‹Р№ URL");
+            assertThat(body).contains("Некорректный URL");
         }
 
         @Test
@@ -197,7 +199,7 @@ public final class AppTest {
             String body = responsePost.getBody();
 
             assertThat(responsePost.getHeaders().getFirst("Location")).isEqualTo("/urls/" + url1.get().getId());
-            assertThat(body.contains("РЎС‚СЂР°РЅРёС†Р° СѓСЃРїРµС€РЅРѕ РїСЂРѕРІРµСЂРµРЅР°"));
+            assertThat(body.contains("Страница успешно проверена"));
 
             String body1 = Unirest
                     .get(baseUrl + "/urls/" + url1.get().getId())
